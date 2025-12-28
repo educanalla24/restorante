@@ -1,0 +1,32 @@
+{
+  "name": "restorante-pedidos",
+  "version": "1.0.0",
+  "description": "Sistema de pedidos para restaurante con QR en mesas",
+  "main": "server.js",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "restaurant",
+    "orders",
+    "qr",
+    "pedidos"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

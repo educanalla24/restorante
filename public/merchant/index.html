@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Café Rewards - Merchant</title>
+    <link rel="stylesheet" href="../styles.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de Login -->
+        <div id="authScreen" class="screen active">
+            <header>
+                <h1>🏪 Merchant Panel</h1>
+                <p class="subtitle">Café Rewards</p>
+            </header>
+
+            <div class="form-card">
+                <h2>Sign In</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+                <div id="loginError" class="error-message"></div>
+                <div class="register-link">
+                    <p>Don't have an account? <a href="#" id="showRegister">Sign up here</a></p>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <div id="registerForm" class="form-card" style="display: none;">
+                <h2>Sign Up as Merchant</h2>
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label for="registerName">Name</label>
+                        <input type="text" id="registerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerBusiness">Business Name</label>
+                        <input type="text" id="registerBusiness" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+                <div id="registerError" class="error-message"></div>
+                <div class="register-link">
+                    <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla Principal del Comerciante -->
+        <div id="mainScreen" class="screen">
+            <header>
+                <h1>🏪 Merchant Panel</h1>
+                <p class="subtitle">Welcome, <span id="merchantName"></span></p>
+                <p class="business-name" id="businessName"></p>
+                <button id="logoutBtn" class="btn btn-small">Sign Out</button>
+            </header>
+
+            <!-- Escáner QR -->
+            <div class="scanner-card">
+                <h2>Scan Customer QR Code</h2>
+                <div id="qr-reader" class="qr-reader"></div>
+                <div id="scanStatus" class="scan-status"></div>
+                <button id="startScanBtn" class="btn btn-primary">Start Scanner</button>
+                <button id="stopScanBtn" class="btn btn-secondary" style="display: none;">Stop Scanner</button>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 10px;">Camera not working?</p>
+                    <button id="manualInputBtn" class="btn btn-secondary" style="font-size: 0.9em; padding: 10px 20px;">Enter Code Manually</button>
+                </div>
+                <!-- Input manual (oculto por defecto) -->
+                <div id="manualInputDiv" style="display: none; margin-top: 15px;">
+                    <input type="text" id="manualQRInput" placeholder="Paste QR code here" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; margin-bottom: 10px;">
+                    <button id="submitManualBtn" class="btn btn-primary" style="width: 100%;">Find Customer</button>
+                    <button id="cancelManualBtn" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Información del Cliente -->
+            <div id="customerInfo" class="customer-info" style="display: none;">
+                <h3>Customer Information</h3>
+                <div class="customer-details">
+                    <p><strong>Name:</strong> <span id="customerName"></span></p>
+                    <p><strong>Email:</strong> <span id="customerEmail"></span></p>
+                </div>
+                
+                <div class="customer-stats">
+                    <div class="stat-card">
+                        <span class="stat-value" id="customerPurchases">0</span>
+                        <span class="stat-label">Coffees Purchased</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="customerRewards">0</span>
+                        <span class="stat-label">Free Coffees</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="customerPoints">0</span>
+                        <span class="stat-label">Current Points</span>
+                    </div>
+                </div>
+
+                <div class="progress-card">
+                    <div class="progress-visual">
+                        <div class="cups-container">
+                            <div class="cup" data-cup="1">
+                                <span class="cup-icon">☕</span>
+                                <span class="cup-number">1</span>
+                            </div>
+                            <div class="cup" data-cup="2">
+                                <span class="cup-icon">☕</span>
+                                <span class="cup-number">2</span>
+                            </div>
+                            <div class="cup" data-cup="3">
+                                <span class="cup-icon">☕</span>
+                                <span class="cup-number">3</span>
+                            </div>
+                            <div class="cup" data-cup="4">
+                                <span class="cup-icon">☕</span>
+                                <span class="cup-number">4</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="customerProgressFill"></div>
+                            </div>
+                            <p class="progress-text">
+                                <span id="customerCurrentCups">0</span> of 4 coffees
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-status" id="customerRewardStatus" style="display: none;">
+                    <p>🎉 This customer can redeem a free coffee!</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="registerPurchaseBtn" class="btn btn-primary">Register Purchase</button>
+                    <button id="redeemRewardBtn" class="btn btn-secondary" style="display: none;">Redeem Free Coffee</button>
+                </div>
+            </div>
+
+            <!-- Mensajes de éxito/error -->
+            <div id="messageDiv" class="message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="merchant.js"></script>
+    <script>
+        // Cargar imagen de fondo personalizada
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedImage = localStorage.getItem('customBackgroundImage');
+            if (savedImage) {
+                document.body.style.backgroundImage = `url(${savedImage})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundAttachment = 'fixed';
+                document.body.classList.add('has-custom-bg');
+                
+                // También aplicar al html para asegurar que cubra todo al hacer scroll
+                document.documentElement.style.backgroundImage = `url(${savedImage})`;
+                document.documentElement.style.backgroundSize = 'cover';
+                document.documentElement.style.backgroundPosition = 'center';
+                document.documentElement.style.backgroundRepeat = 'no-repeat';
+                document.documentElement.style.backgroundAttachment = 'fixed';
+            }
+        });
+    </script>
+</body>
+</html>
+

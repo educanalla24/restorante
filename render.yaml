@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: restorante-pedidos
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Nota: Agrega SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY desde el dashboard de Render
+    healthCheckPath: /

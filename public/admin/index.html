@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👨‍💼 Admin Panel</h1>
+            <p class="subtitle">Manage orders and menu</p>
+        </header>
+
+        <div class="card">
+            <h2>Filters</h2>
+            <div class="filters">
+                <button class="filter-btn active" data-estado="">All</button>
+                <button class="filter-btn" data-estado="pendiente">Pending</button>
+                <button class="filter-btn" data-estado="preparando">Preparing</button>
+                <button class="filter-btn" data-estado="listo">Ready</button>
+                <button class="filter-btn" data-estado="entregado">Delivered</button>
+            </div>
+        </div>
+
+        <div id="ordersContainer" class="loading">
+            Loading orders...
+        </div>
+    </div>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+
