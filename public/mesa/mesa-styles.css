@@ -185,6 +185,7 @@ body {
 
 .menu-category-section {
     margin-bottom: 50px;
+    display: block; /* Show by default */
 }
 
 .category-title {

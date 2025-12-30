@@ -125,7 +125,15 @@ function renderMenu() {
     });
 
     container.innerHTML = html;
-    filterByCategory(activeCategory);
+    
+    // Filter by active category after DOM is updated
+    if (activeCategory) {
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+            filterByCategory(activeCategory);
+        });
+    }
+    
     updateCartHeader();
 }
 
