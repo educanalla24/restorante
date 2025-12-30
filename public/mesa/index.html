@@ -4,55 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Table</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="mesa-styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🍽️ Restaurant Menu</h1>
-            <p class="subtitle" id="mesaInfo">Table <span id="mesaNumero">-</span></p>
-        </header>
-
-        <div class="main-layout">
-            <div class="menu-section">
-                <div id="menuContainer" class="loading">
-                    Loading menu...
-                </div>
+    <!-- Fixed Cart Header -->
+    <div class="cart-header">
+        <div class="cart-header-content">
+            <div class="cart-header-left">
+                <span class="cart-icon">🛒</span>
+                <span class="cart-total-text">$<span id="headerTotal">0.00</span></span>
             </div>
-
-            <div class="cart">
-                <h2>🛒 Your Order</h2>
-                <div id="cartItems" class="cart-items">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🛒</div>
-                        <p>Your cart is empty</p>
-                        <p style="font-size: 0.9em; margin-top: 10px;">Select items from the menu to add them</p>
-                    </div>
-                </div>
-                <div class="cart-total">
-                    <div class="total-row">
-                        <span>Subtotal:</span>
-                        <span id="subtotal">$0.00</span>
-                    </div>
-                    <div class="total-row final">
-                        <span>Total:</span>
-                        <span id="total">$0.00</span>
-                    </div>
-                </div>
-                <div style="margin-top: 20px;">
-                    <label for="notas" style="display: block; margin-bottom: 8px; font-weight: 600;">Special notes:</label>
-                    <textarea id="notas" class="notes-input" placeholder="E.g: No onions, well done, etc."></textarea>
-                </div>
-                <button id="confirmarPedido" class="btn btn-primary" disabled>
-                    Confirm Order
-                </button>
-            </div>
+            <button id="viewCartBtn" class="view-cart-btn">View Cart</button>
         </div>
     </div>
 
+    <!-- Main Container -->
+    <div class="menu-container">
+        <!-- Header -->
+        <header class="menu-header">
+            <div class="restaurant-logo" id="restaurantLogo">
+                <h1 id="restaurantName">Restaurant Menu</h1>
+            </div>
+            <p class="table-info">Table <span id="mesaNumero">-</span></p>
+        </header>
+
+        <!-- Menu Categories -->
+        <div class="menu-categories" id="menuCategories">
+            <!-- Categories will be dynamically generated -->
+        </div>
+
+        <!-- Menu Items -->
+        <div class="menu-items-container" id="menuContainer">
+            <div class="loading">Loading menu...</div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-sidebar-header">
+            <h2>Your Order</h2>
+            <button class="close-cart-btn" id="closeCartBtn">×</button>
+        </div>
+        
+        <div class="cart-sidebar-content">
+            <div id="cartItems" class="cart-items-list">
+                <div class="empty-cart">
+                    <div class="empty-cart-icon">🛒</div>
+                    <p>Your cart is empty</p>
+                    <p class="empty-cart-subtitle">Select items from the menu to add them</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cart-sidebar-footer">
+            <div class="cart-totals">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="total-row final">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="special-notes-section">
+                <label for="notas">Special notes:</label>
+                <textarea id="notas" class="notes-input" placeholder="E.g: No onions, well done, etc." rows="3"></textarea>
+            </div>
+            
+            <button id="confirmarPedido" class="btn btn-primary confirm-order-btn" disabled>
+                Confirm Order
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Notification -->
     <div id="notification" class="notification" style="display: none;"></div>
 
     <script src="mesa.js"></script>
 </body>
 </html>
-

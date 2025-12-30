@@ -1,13 +1,14 @@
-// Obtener parámetros de la URL
+// Get URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const mesaId = urlParams.get('mesa') || '1';
 
-// Estado de la aplicación
+// Application state
 let menu = [];
 let cart = [];
 let API_URL = '';
+let activeCategory = '';
 
-// Detectar URL base automáticamente
+// Detect base URL automatically
 const getApiUrl = () => {
     const port = window.location.port;
     if (port) {
@@ -16,7 +17,7 @@ const getApiUrl = () => {
     return `${window.location.protocol}//${window.location.hostname}/api`;
 };
 
-// Inicialización
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     API_URL = getApiUrl();
     document.getElementById('mesaNumero').textContent = mesaId;
@@ -24,9 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
-// Configurar event listeners
+// Setup event listeners
 function setupEventListeners() {
     document.getElementById('confirmarPedido').addEventListener('click', confirmarPedido);
+    document.getElementById('viewCartBtn').addEventListener('click', openCart);
+    document.getElementById('closeCartBtn').addEventListener('click', closeCart);
+    document.getElementById('cartOverlay').addEventListener('click', closeCart);
 }
 
 // Load menu
@@ -41,8 +45,7 @@ async function loadMenu() {
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('menuContainer').innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">⚠️</div>
+            <div class="loading">
                 <p>Error loading menu</p>
                 <p style="font-size: 0.9em; margin-top: 10px;">Please reload the page</p>
             </div>
@@ -53,11 +56,11 @@ async function loadMenu() {
 // Render menu
 function renderMenu() {
     const container = document.getElementById('menuContainer');
+    const categoriesContainer = document.getElementById('menuCategories');
     
     if (menu.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🍽️</div>
+            <div class="loading">
                 <p>No items available in the menu</p>
             </div>
         `;
@@ -73,22 +76,44 @@ function renderMenu() {
         categorias[item.categoria].push(item);
     });
 
+    // Render category buttons
+    const categoryKeys = Object.keys(categorias);
+    if (categoryKeys.length > 0 && !activeCategory) {
+        activeCategory = categoryKeys[0];
+    }
+
+    let categoriesHtml = '';
+    categoryKeys.forEach(cat => {
+        categoriesHtml += `
+            <button class="category-btn ${cat === activeCategory ? 'active' : ''}" 
+                    data-category="${cat}" 
+                    onclick="filterByCategory('${cat}')">
+                ${cat}
+            </button>
+        `;
+    });
+    categoriesContainer.innerHTML = categoriesHtml;
+
+    // Render menu items
     let html = '';
-    Object.keys(categorias).forEach(categoria => {
-        html += `<div class="card" style="margin-bottom: 20px;">`;
-        html += `<h2>${categoria}</h2>`;
-        html += `<div class="menu-grid">`;
+    categoryKeys.forEach(categoria => {
+        html += `<div class="menu-category-section" data-category="${categoria}">`;
+        html += `<h2 class="category-title">${categoria}</h2>`;
+        html += `<div class="menu-items-list">`;
         
         categorias[categoria].forEach(item => {
             const inCart = cart.find(c => c.id === item.id);
             html += `
-                <div class="menu-item ${inCart ? 'selected' : ''}" data-id="${item.id}">
-                    <span class="menu-item-category">${categoria}</span>
-                    <div class="menu-item-name">${item.nombre}</div>
-                    <div class="menu-item-description">${item.descripcion || ''}</div>
-                    <div class="menu-item-footer">
-                        <span class="menu-item-price">$${parseFloat(item.precio).toFixed(2)}</span>
-                        <button class="btn btn-small btn-primary add-to-cart" data-id="${item.id}">
+                <div class="menu-item-card" data-id="${item.id}">
+                    <div class="menu-item-left">
+                        <div class="menu-item-name">${item.nombre}</div>
+                        ${item.descripcion ? `<div class="menu-item-description">${item.descripcion}</div>` : ''}
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <div class="menu-item-price">$${parseFloat(item.precio).toFixed(2)}</div>
+                        <button class="menu-item-add-btn ${inCart ? 'added' : ''}" 
+                                data-id="${item.id}" 
+                                onclick="addToCart(${item.id})">
                             ${inCart ? '✓ Added' : '+ Add'}
                         </button>
                     </div>
@@ -100,28 +125,36 @@ function renderMenu() {
     });
 
     container.innerHTML = html;
-
-    // Add event listeners to buttons
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const itemId = parseInt(btn.dataset.id);
-            addToCart(itemId);
-        });
-    });
-
-    // Add event listeners to menu items
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('btn')) {
-                const itemId = parseInt(item.dataset.id);
-                addToCart(itemId);
-            }
-        });
-    });
+    filterByCategory(activeCategory);
+    updateCartHeader();
 }
 
-// Agregar al carrito
+// Filter by category
+function filterByCategory(category) {
+    activeCategory = category;
+    
+    // Update active button
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.category === category) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Show/hide category sections
+    document.querySelectorAll('.menu-category-section').forEach(section => {
+        if (section.dataset.category === category) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+    });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Add to cart
 function addToCart(itemId) {
     const item = menu.find(m => m.id === itemId);
     if (!item) return;
@@ -139,18 +172,18 @@ function addToCart(itemId) {
     }
 
     updateCart();
-    renderMenu(); // Re-render to show "selected" state
+    renderMenu(); // Re-render to show "added" state
     showNotification('Item added to cart', 'success');
 }
 
-// Remover del carrito
+// Remove from cart
 function removeFromCart(itemId) {
     cart = cart.filter(c => c.id !== itemId);
     updateCart();
     renderMenu();
 }
 
-// Actualizar cantidad en carrito
+// Update quantity in cart
 function updateQuantity(itemId, delta) {
     const item = cart.find(c => c.id === itemId);
     if (!item) return;
@@ -163,34 +196,33 @@ function updateQuantity(itemId, delta) {
     }
 }
 
-// Actualizar carrito
+// Update cart
 function updateCart() {
     const container = document.getElementById('cartItems');
     const confirmBtn = document.getElementById('confirmarPedido');
 
     if (cart.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🛒</div>
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
                 <p>Your cart is empty</p>
-                <p style="font-size: 0.9em; margin-top: 10px;">Select items from the menu to add them</p>
+                <p class="empty-cart-subtitle">Select items from the menu to add them</p>
             </div>
         `;
         confirmBtn.disabled = true;
     } else {
         let html = '';
         cart.forEach(item => {
-            const subtotal = item.precio * item.cantidad;
             html += `
-                <div class="cart-item">
-                    <div class="cart-item-info">
+                <div class="cart-item-card">
+                    <div class="cart-item-header">
                         <div class="cart-item-name">${item.nombre}</div>
-                        <div class="cart-item-price">$${item.precio.toFixed(2)} each</div>
+                        <div class="cart-item-price">$${(item.precio * item.cantidad).toFixed(2)}</div>
                     </div>
-                    <div class="cart-item-quantity">
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
-                        <span class="quantity-value">${item.cantidad}</span>
-                        <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    <div class="cart-item-controls">
+                        <button class="quantity-control-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                        <span class="quantity-display">${item.cantidad}</span>
+                        <button class="quantity-control-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
                     </div>
                 </div>
             `;
@@ -203,6 +235,28 @@ function updateCart() {
     const subtotal = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
     document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
     document.getElementById('total').textContent = `$${subtotal.toFixed(2)}`;
+    
+    updateCartHeader();
+}
+
+// Update cart header
+function updateCartHeader() {
+    const total = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    document.getElementById('headerTotal').textContent = total.toFixed(2);
+}
+
+// Open cart sidebar
+function openCart() {
+    document.getElementById('cartSidebar').classList.add('open');
+    document.getElementById('cartOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close cart sidebar
+function closeCart() {
+    document.getElementById('cartSidebar').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('show');
+    document.body.style.overflow = '';
 }
 
 // Confirm order
@@ -249,6 +303,7 @@ async function confirmarPedido() {
         cart = [];
         updateCart();
         document.getElementById('notas').value = '';
+        closeCart();
         
         // Re-render menu
         renderMenu();
@@ -262,7 +317,7 @@ async function confirmarPedido() {
     }
 }
 
-// Mostrar notificación
+// Show notification
 function showNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
     notification.textContent = message;
@@ -273,4 +328,3 @@ function showNotification(message, type = 'success') {
         notification.style.display = 'none';
     }, 3000);
 }
-
