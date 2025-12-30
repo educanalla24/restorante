@@ -23,7 +23,45 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('mesaNumero').textContent = mesaId;
     loadMenu();
     setupEventListeners();
+    setupLogo();
 });
+
+// Setup restaurant logo
+function setupLogo() {
+    const logoImg = document.getElementById('restaurantLogoImg');
+    const logoName = document.getElementById('restaurantName');
+    
+    // Try different logo paths
+    const logoPaths = [
+        'logo.jpg',
+        '../logo.jpg',
+        '../../logo.jpg',
+        'images/logo.jpg',
+        '../images/logo.jpg'
+    ];
+    
+    let currentPathIndex = 0;
+    
+    function tryNextLogo() {
+        if (currentPathIndex < logoPaths.length) {
+            logoImg.src = logoPaths[currentPathIndex];
+            currentPathIndex++;
+        } else {
+            // If no logo found, show text
+            logoImg.style.display = 'none';
+            logoName.style.display = 'block';
+        }
+    }
+    
+    logoImg.onerror = tryNextLogo;
+    logoImg.onload = () => {
+        logoImg.style.display = 'block';
+        logoName.style.display = 'none';
+    };
+    
+    // Start trying logos
+    tryNextLogo();
+}
 
 // Setup event listeners
 function setupEventListeners() {
