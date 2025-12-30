@@ -115,18 +115,20 @@ body {
     border-bottom: 2px solid var(--border-color);
 }
 
-.restaurant-logo h1 {
-    font-size: 2.5em;
-    font-weight: 300;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    letter-spacing: 1px;
+.restaurant-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
-.table-info {
-    color: var(--text-secondary);
-    font-size: 1em;
-    font-weight: 400;
+.restaurant-logo-img {
+    max-width: 100%;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
 }
 
 /* Menu Categories */

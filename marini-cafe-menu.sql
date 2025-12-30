@@ -4,7 +4,7 @@
 -- ============================================
 
 -- Clear existing menu items (optional - comment out if you want to keep existing items)
--- DELETE FROM menu_items;
+ DELETE FROM menu_items;
 
 -- Coffee/Tea Category
 INSERT INTO menu_items (nombre, descripcion, precio, categoria, activo) VALUES
