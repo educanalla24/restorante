@@ -130,7 +130,7 @@ app.patch('/api/pedidos/:id', async (req, res) => {
 
         if (!estado || !['pendiente', 'preparando', 'listo', 'entregado', 'cancelado'].includes(estado)) {
             return res.status(400).json({ error: 'Invalid status' });
-        }
+    }
 
         const { data, error } = await supabase
             .from('pedidos')

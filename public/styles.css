@@ -574,13 +574,13 @@ header h1 {
     .main-layout {
         grid-template-columns: 1fr;
     }
-
+    
     .cart {
         position: relative;
         top: 0;
         max-height: none;
     }
-
+    
     .menu-grid {
         grid-template-columns: 1fr;
     }
