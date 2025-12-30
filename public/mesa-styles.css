@@ -82,29 +82,11 @@ body {
     background: #333;
 }
 
-/* Fixed Categories Header */
-.categories-header {
-    position: fixed;
-    top: 57px; /* Height of cart header */
-    left: 0;
-    right: 0;
-    background: #fff;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 999;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.categories-header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
 /* Main Container */
 .menu-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 180px 20px 40px; /* Increased top padding to account for both headers */
+    padding: 100px 20px 40px;
 }
 
 /* Menu Header */
@@ -133,23 +115,11 @@ body {
 .menu-categories {
     display: flex;
     gap: 15px;
-    padding: 15px 0;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-}
-
-.menu-categories::-webkit-scrollbar {
-    height: 4px;
-}
-
-.menu-categories::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.menu-categories::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 2px;
 }
 
 .category-btn {
@@ -546,16 +516,8 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .categories-header {
-        top: 57px;
-    }
-
-    .categories-header-content {
-        padding: 0 15px;
-    }
-
     .menu-container {
-        padding: 160px 15px 30px;
+        padding: 80px 15px 30px;
     }
 
     .restaurant-logo h1 {
