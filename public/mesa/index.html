@@ -10,11 +10,13 @@
     <!-- Fixed Cart Header -->
     <div class="cart-header">
         <div class="cart-header-content">
-            <div class="cart-header-left">
+            <div class="cart-header-right">
+                <button id="searchMenuBtn" class="search-menu-btn" title="Search Menu">🔍</button>
                 <span class="cart-icon">🛒</span>
                 <span class="cart-total-text">$<span id="headerTotal">0.00</span></span>
+                <button id="clearCartBtn" class="clear-cart-btn" title="Clear Cart">🗑️</button>
+                <button id="viewCartBtn" class="view-cart-btn">View Cart</button>
             </div>
-            <button id="viewCartBtn" class="view-cart-btn">View Cart</button>
         </div>
     </div>
 
@@ -35,7 +37,6 @@
                 <img src="logo.jpg" alt="Restaurant Logo" class="restaurant-logo-img" id="restaurantLogoImg">
                 <h1 id="restaurantName" style="display: none;">Restaurant Menu</h1>
             </div>
-            <p class="table-info">Table <span id="mesaNumero">-</span></p>
         </header>
 
         <!-- Menu Items -->
@@ -86,6 +87,58 @@
 
     <!-- Cart Overlay -->
     <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- Product Modal -->
+    <div class="product-modal" id="productModal">
+        <div class="product-modal-content">
+            <button class="product-modal-close" id="closeProductModal">×</button>
+            <div class="product-modal-header">
+                <h2 id="modalProductName"></h2>
+                <div class="product-modal-price" id="modalProductPrice"></div>
+            </div>
+            <div class="product-modal-body">
+                <div class="product-modal-description" id="modalProductDescription"></div>
+                <div class="product-modal-options" id="modalProductOptions"></div>
+                <div class="product-modal-notes">
+                    <label for="modalProductNotes">Special instructions:</label>
+                    <textarea id="modalProductNotes" placeholder="E.g: No onions, well done, etc." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="product-modal-footer">
+                <div class="product-modal-quantity">
+                    <button class="quantity-control-btn" onclick="decreaseModalQuantity()">−</button>
+                    <span class="quantity-display" id="modalQuantity">1</span>
+                    <button class="quantity-control-btn" onclick="increaseModalQuantity()">+</button>
+                </div>
+                <button class="btn btn-primary add-to-cart-modal-btn" id="addToCartModalBtn">
+                    Add to Cart - $<span id="modalTotalPrice">0.00</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal Overlay -->
+    <div class="product-modal-overlay" id="productModalOverlay"></div>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-content">
+            <div class="search-modal-header">
+                <h2>Search Menu</h2>
+                <button class="close-modal-btn" id="closeSearchModalBtn">×</button>
+            </div>
+            <div class="search-modal-body">
+                <div class="search-input-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Type to search menu items..." autofocus>
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div id="searchResults" class="search-results">
+                    <div class="search-placeholder">Start typing to search...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="search-modal-overlay" id="searchModalOverlay"></div>
 
     <!-- Notification -->
     <div id="notification" class="notification" style="display: none;"></div>

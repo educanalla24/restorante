@@ -56,6 +56,51 @@ app.get('/api/menu', async (req, res) => {
     }
 });
 
+// Get modifiers for a category
+app.get('/api/modifiers/:category', async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        const { data, error } = await supabase
+            .from('menu_modifiers')
+            .select('*')
+            .contains('applies_to_categories', [category])
+            .order('modifier_group', { ascending: true })
+            .order('display_order', { ascending: true });
+
+        if (error) {
+            console.error('Error getting modifiers:', error);
+            return res.status(500).json({ error: 'Error getting modifiers' });
+        }
+
+        // Group modifiers by group
+        const grouped = {};
+        if (data) {
+            data.forEach(mod => {
+                if (!grouped[mod.modifier_group]) {
+                    grouped[mod.modifier_group] = {
+                        group: mod.modifier_group,
+                        is_multiple: mod.is_multiple,
+                        is_required: mod.is_required,
+                        options: []
+                    };
+                }
+                grouped[mod.modifier_group].options.push({
+                    id: mod.id,
+                    name: mod.modifier_name,
+                    price: parseFloat(mod.price_modifier),
+                    is_multiple: mod.is_multiple
+                });
+            });
+        }
+
+        res.json(Object.values(grouped));
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Create order
 app.post('/api/pedidos', async (req, res) => {
     try {

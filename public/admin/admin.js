@@ -108,7 +108,19 @@ function renderPedidos() {
                 const cantidad = item.cantidad || 1;
                 html += `
                     <div class="order-item">
-                        <span class="order-item-name">${item.nombre}</span>
+                        <div style="flex: 1;">
+                            <div class="order-item-name">${item.nombre}</div>
+                            ${item.modifiers && item.modifiers.length > 0 ? `
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">
+                                    ${item.modifiers.map(m => `${m.name}${m.price > 0 ? ` (+$${m.price.toFixed(2)})` : ''}`).join(', ')}
+                                </div>
+                            ` : ''}
+                            ${item.notas && item.notas.trim() ? `
+                                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px; font-style: italic;">
+                                    📝 ${item.notas}
+                                </div>
+                            ` : ''}
+                        </div>
                         <span class="order-item-quantity">x${cantidad}</span>
                         <span class="order-item-price">$${(precio * cantidad).toFixed(2)}</span>
                     </div>
