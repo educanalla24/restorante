@@ -192,7 +192,6 @@ function renderMenu() {
         html += `<div class="menu-items-list">`;
         
         categorias[categoria].forEach(item => {
-            const inCart = cart.find(c => c.id === item.id);
             html += `
                 <div class="menu-item-card" data-id="${item.id}" onclick="openProductModal(${item.id})">
                     <div class="menu-item-left">
@@ -201,11 +200,6 @@ function renderMenu() {
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
                         <div class="menu-item-price">$${parseFloat(item.precio).toFixed(2)}</div>
-                        <button class="menu-item-add-btn ${inCart ? 'added' : ''}" 
-                                data-id="${item.id}" 
-                                onclick="event.stopPropagation(); openProductModal(${item.id})">
-                            ${inCart ? '✓ Added' : '+ Add'}
-                        </button>
                     </div>
                 </div>
             `;

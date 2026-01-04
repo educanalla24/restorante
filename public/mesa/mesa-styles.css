@@ -1089,8 +1089,28 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+    .cart-header {
+        padding: 10px 15px;
+        min-height: 60px; /* Ensure minimum height */
+    }
+
+    .cart-header-right {
+        gap: 8px; /* Reduce gap on mobile */
+    }
+
+    .search-menu-btn,
+    .clear-cart-btn {
+        padding: 6px 10px;
+        font-size: 1em;
+    }
+
+    .view-cart-btn {
+        padding: 8px 16px;
+        font-size: 0.85em;
+    }
+
     .categories-header {
-        top: 57px;
+        top: 65px; /* Increased to prevent overlap with cart header */
     }
 
     .categories-header-content {
@@ -1098,7 +1118,7 @@ body {
     }
 
     .menu-container {
-        padding: 160px 0 30px 0;
+        padding: 200px 0 30px 0; /* Increased top padding to account for both headers */
     }
 
     .restaurant-logo h1 {
