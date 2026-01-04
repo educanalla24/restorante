@@ -730,6 +730,22 @@ body {
 
 .modifier-group-header {
     margin-bottom: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.modifier-group-header:hover {
+    background: var(--hover-bg);
+}
+
+.modifier-group-title {
+    flex: 1;
 }
 
 .modifier-group-header h3 {
@@ -745,10 +761,29 @@ body {
     font-style: italic;
 }
 
+.modifier-group-toggle {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    margin-left: 10px;
+}
+
 .modifier-options {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow: hidden;
+    max-height: 1000px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+}
+
+.modifier-options.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .modifier-option {

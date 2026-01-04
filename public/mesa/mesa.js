@@ -37,11 +37,11 @@ function setupLogo() {
     
     // Try different logo paths
     const logoPaths = [
-        'logo.jpg',
-        '../logo.jpg',
-        '../../logo.jpg',
-        'images/logo.jpg',
-        '../images/logo.jpg'
+        'logo2.png',
+        '../logo2.png',
+        '../../logo2.png',
+        'images/logo2.png',
+        '../images/logo2.png'
     ];
     
     let currentPathIndex = 0;
@@ -599,13 +599,20 @@ function renderModifiers() {
     });
 
     sortedModifiers.forEach(group => {
+        const groupId = sanitizeGroupId(group.group);
+        const hasSelection = modalModifiers[group.group] && modalModifiers[group.group].length > 0;
+        const collapsedClass = hasSelection ? '' : 'collapsed';
+        const toggleIcon = hasSelection ? '▲' : '▼';
         html += `
             <div class="modifier-group">
-                <div class="modifier-group-header">
-                    <h3>${group.group}</h3>
-                    <span class="modifier-group-hint">${group.is_multiple ? 'Select multiple (Optional)' : 'Select one (Optional)'}</span>
+                <div class="modifier-group-header" onclick="toggleModifierGroup('${group.group.replace(/'/g, "\\'")}')">
+                    <div class="modifier-group-title">
+                        <h3>${group.group}</h3>
+                        <span class="modifier-group-hint">${group.is_multiple ? 'Select multiple (Optional)' : 'Select one (Optional)'}</span>
+                    </div>
+                    <span class="modifier-group-toggle">${toggleIcon}</span>
                 </div>
-                <div class="modifier-options">
+                <div class="modifier-options ${collapsedClass}" id="modifier-options-${groupId}">
         `;
 
         group.options.forEach(option => {
@@ -634,6 +641,43 @@ function renderModifiers() {
     container.innerHTML = html;
 }
 
+// Sanitize group ID for use in HTML
+function sanitizeGroupId(group) {
+    return group.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+}
+
+// Toggle modifier group expand/collapse
+function toggleModifierGroup(group) {
+    const groupId = sanitizeGroupId(group);
+    const optionsContainer = document.getElementById(`modifier-options-${groupId}`);
+    if (!optionsContainer) return;
+    
+    const header = optionsContainer.previousElementSibling;
+    const toggleIcon = header.querySelector('.modifier-group-toggle');
+    
+    if (optionsContainer.classList.contains('collapsed')) {
+        optionsContainer.classList.remove('collapsed');
+        toggleIcon.textContent = '▲';
+    } else {
+        optionsContainer.classList.add('collapsed');
+        toggleIcon.textContent = '▼';
+    }
+}
+
+// Expand modifier group (used when a modifier is selected)
+function expandModifierGroup(group) {
+    const groupId = sanitizeGroupId(group);
+    const optionsContainer = document.getElementById(`modifier-options-${groupId}`);
+    if (!optionsContainer) return;
+    
+    if (optionsContainer.classList.contains('collapsed')) {
+        const header = optionsContainer.previousElementSibling;
+        const toggleIcon = header.querySelector('.modifier-group-toggle');
+        optionsContainer.classList.remove('collapsed');
+        toggleIcon.textContent = '▲';
+    }
+}
+
 // Handle modifier selection change
 function handleModifierChange(group, optionId, price, isMultiple) {
     if (!modalModifiers[group]) {
@@ -653,6 +697,12 @@ function handleModifierChange(group, optionId, price, isMultiple) {
         modalModifiers[group] = [optionId];
     }
 
+    // Expand the group when a modifier is selected
+    expandModifierGroup(group);
+    
+    // Expand the group when a modifier is selected
+    expandModifierGroup(group);
+    
     // Update UI
     renderModifiers();
     updateModalQuantity();
