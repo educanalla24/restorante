@@ -1140,6 +1140,7 @@ body {
         flex-direction: column;
         overflow: hidden;
         box-sizing: border-box;
+        padding-bottom: 0; /* Ensure no extra padding on sidebar itself */
     }
 
     .cart-sidebar-header {
@@ -1157,12 +1158,14 @@ body {
     .cart-sidebar-footer {
         flex-shrink: 0;
         padding: 15px;
+        padding-bottom: calc(40px + env(safe-area-inset-bottom)); /* Extra bottom padding + safe area for devices with notch */
         position: sticky;
         bottom: 0;
         z-index: 100;
         background: white;
         border-top: 2px solid var(--border-color);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px; /* Additional margin to prevent cutoff on all devices */
     }
 
     .confirm-order-btn {
@@ -1170,6 +1173,7 @@ body {
         padding: 15px;
         font-size: 1em;
         margin-top: 10px;
+        margin-bottom: 0;
         position: relative;
         z-index: 101;
         display: block !important;
