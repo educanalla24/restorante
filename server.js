@@ -30,6 +30,26 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Serve marketing page for root domain (yourturnai.com) - MUST be before static middleware
+app.get('/', (req, res) => {
+    // Check if request is for marketing page domain
+    const host = req.get('host') || '';
+    const serveMarketingPage = process.env.SERVE_MARKETING_PAGE === 'true' || 
+                                host.includes('yourturnai.com');
+    
+    console.log(`Root request - Host: ${host}, ServeMarketingPage: ${serveMarketingPage}`);
+    
+    if (serveMarketingPage) {
+        // Serve marketing page for yourturnai.com domain
+        res.sendFile(path.join(__dirname, 'marketingpage', 'index.html'));
+    } else {
+        // Serve regular public index for other cases
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+});
+
+// Static file middleware - after route handlers
 app.use(express.static('public'));
 app.use('/marketingpage', express.static('marketingpage'));
 
@@ -221,22 +241,6 @@ app.get('/api/mesa/:mesa_id/pedidos', async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Serve marketing page for root domain (yourturnai.com)
-app.get('/', (req, res) => {
-    // Check if request is for marketing page domain
-    const host = req.get('host') || '';
-    const serveMarketingPage = process.env.SERVE_MARKETING_PAGE === 'true' || 
-                                host.includes('yourturnai.com');
-    
-    if (serveMarketingPage) {
-        // Serve marketing page for yourturnai.com domain
-        res.sendFile(path.join(__dirname, 'marketingpage', 'index.html'));
-    } else {
-        // Serve regular public index for other cases
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
 });
 
