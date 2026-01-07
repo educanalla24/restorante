@@ -31,6 +31,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use('/marketingpage', express.static('marketingpage'));
 
 // ========== API ROUTES ==========
 
@@ -223,11 +224,32 @@ app.get('/api/mesa/:mesa_id/pedidos', async (req, res) => {
     }
 });
 
+// Serve marketing page for root domain (yourturn.com)
+app.get('/', (req, res) => {
+    // Check if request is for marketing page domain
+    const host = req.get('host') || '';
+    const serveMarketingPage = process.env.SERVE_MARKETING_PAGE === 'true' || 
+                                host.includes('yourturn.com') || 
+                                host.includes('yourturnai.com');
+    
+    if (serveMarketingPage) {
+        // Serve marketing page for yourturn.com domain
+        res.sendFile(path.join(__dirname, 'marketingpage', 'index.html'));
+    } else {
+        // Serve regular public index for other cases
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+});
+
 // Catch-all route to serve frontend (SPA)
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'API route not found' });
     }
+    if (req.path.startsWith('/marketingpage')) {
+        return res.sendFile(path.join(__dirname, 'marketingpage', 'index.html'));
+    }
+    // For SPA routes, serve public/index.html
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

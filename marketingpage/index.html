@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YourTurn AI - Digital Menu Solutions for Restaurants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            margin-bottom: 50px;
+        }
+
+        .hero h2 {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .feature-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* QR Demo Section */
+        .demo-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin: 50px 0;
+            border-radius: 10px;
+        }
+
+        .demo-section h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .demo-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .qr-code img {
+            width: 200px;
+            height: 200px;
+            display: block;
+        }
+
+        .demo-button {
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .demo-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 50px 20px;
+            background: #f8f9fa;
+            margin: 50px 0;
+        }
+
+        .benefits h2 {
+            text-align: center;
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 40px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .benefit-item {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .benefit-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        /* Process Section */
+        .process {
+            padding: 50px 20px;
+            margin: 50px 0;
+        }
+
+        .process h2 {
+            text-align: center;
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 40px;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+
+        /* Contact Section */
+        .contact {
+            background: #2d3748;
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .contact h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .contact-item {
+            font-size: 1.2em;
+        }
+
+        .contact-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            .demo-button {
+                border: 2px solid #667eea;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            .hero h2 {
+                font-size: 1.8em;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="images/logoyourturnai.png" alt="YourTurn AI Logo" class="logo">
+        <h1>YourTurn AI</h1>
+        <p>Digital Menu Solutions for Modern Restaurants</p>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h2>A System That Helps Restaurants Deliver</h2>
+            <p>Online ordering that makes your job easier and provides a seamless experience for customers. Transform your restaurant with our complete digital menu solution.</p>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <img src="images/scaningqr.png" alt="QR Code Scanning">
+                <h3>Ordering Right From the Table</h3>
+                <p>Ease up your staff and reduce contact with QR ordering. Customers scan a QR code on their table to access your menu instantly. Orders go directly from customers' phones to your order screen and printer.</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/lookingthechartanalisis.png" alt="Analytics Dashboard">
+                <h3>See Your Performance in Real Time</h3>
+                <p>View insights about your business that can help you reach your goals. Track orders, manage inventory, and take advantage of built-in marketing tools. Automatic table number recognition reduces staff costs.</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/someonepaying.png" alt="Payment Processing">
+                <h3>Get Paid Fast From Anywhere</h3>
+                <p>Accept payments reliably from anywhere without relying on outside software. Your customers pay your brand directly. Compatible with Google Pay and Apple Pay. Works online and offline.</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/twopeoplefivehi.png" alt="Customer Experience">
+                <h3>One System That Does It All</h3>
+                <p>We provide you with everything you need to run a successful business. All you have to think about are the orders going out the door. A seamless ordering experience for all your customers.</p>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <h2>Try It Yourself!</h2>
+            <div class="demo-content">
+                <div class="qr-code">
+                    <img src="qr.png" alt="QR Code Demo">
+                </div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;">Scan this QR code to access a demo of the menu</p>
+                <a href="/mesa?mesa=1" class="demo-button" target="_blank">Access Menu Demo</a>
+            </div>
+        </section>
+
+        <section class="benefits">
+            <h2>Why Choose YourTurn AI?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <h3>Highly Customizable</h3>
+                    <p>Adapt the menu to your branding with custom colors, logos, and photos. Include images of dishes or keep it simple - it's your choice.</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>Complete Service</h3>
+                    <p>We handle everything from QR code generation with your preferred style to converting your physical menu to a beautiful online version.</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>Flexible Payment Options</h3>
+                    <p>Choose between direct payment on the page or payment at the counter - whatever works best for your business.</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>Online Ordering & Reservations</h3>
+                    <p>Customers can order from home via your custom domain (www.yournameshop.com) for pickup at specific times, or reserve a table online.</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>Fast Implementation</h3>
+                    <p>We ensure everything is up and running within one week. Quick setup, minimal disruption to your business.</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>Mobile-Friendly</h3>
+                    <p>Offers a seamless transition from website to menu. Responsive to any device type - compete with top restaurant websites.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="process">
+            <h2>How It Works</h2>
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Contact Us</h3>
+                    <p>Reach out to discuss your needs and preferences</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Customization</h3>
+                    <p>We design your menu with your branding and style</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>QR Setup</h3>
+                    <p>We create and deliver your custom QR codes</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Go Live</h3>
+                    <p>Everything is ready in one week - start serving!</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Support</h3>
+                    <p>Ongoing support to ensure smooth operations</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="contact">
+        <h2>Get Started Today</h2>
+        <div class="contact-info">
+            <div class="contact-item">
+                <strong>Phone:</strong> <a href="tel:+61417798692">+61 417 798 692</a>
+            </div>
+            <div class="contact-item">
+                <strong>Email:</strong> <a href="mailto:yourturnai@gmail.com">yourturnai@gmail.com</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
