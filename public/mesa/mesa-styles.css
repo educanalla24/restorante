@@ -161,7 +161,10 @@ body {
 .menu-container {
     max-width: 100%;
     margin: 0;
-    padding: 180px 0 0 0; /* Increased top padding to account for both headers */
+    padding-top: 120px; /* Padding to account for both headers (cart ~57px + categories ~63px) */
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
     width: 100%;
 }
 
@@ -179,7 +182,8 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: 15px;
+    margin: 0;
+    padding: 0;
 }
 
 .restaurant-logo-img {
