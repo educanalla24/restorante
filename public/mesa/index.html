@@ -140,9 +140,35 @@
     </div>
     <div class="search-modal-overlay" id="searchModalOverlay"></div>
 
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-modal-content">
+            <button class="payment-modal-close" id="closePaymentModal">×</button>
+            <div class="payment-modal-header">
+                <h2>Complete Payment</h2>
+                <div class="payment-amount">Total: $<span id="paymentTotal">0.00</span></div>
+            </div>
+            <div class="payment-modal-body">
+                <div id="payment-element">
+                    <!-- Stripe Elements will be mounted here -->
+                </div>
+                <div id="payment-message" class="payment-message" style="display: none;"></div>
+            </div>
+            <div class="payment-modal-footer">
+                <button id="submit-payment-btn" class="submit-payment-btn">
+                    Pay $<span id="submitPaymentAmount">0.00</span>
+                </button>
+                <button id="cancel-payment-btn" class="cancel-payment-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class="payment-modal-overlay" id="paymentModalOverlay"></div>
+
     <!-- Notification -->
     <div id="notification" class="notification" style="display: none;"></div>
 
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="mesa.js"></script>
 </body>
 </html>

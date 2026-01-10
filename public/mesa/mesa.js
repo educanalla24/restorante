@@ -12,6 +12,11 @@ let modalQuantity = 1;
 let modalModifiers = {}; // Store selected modifiers {groupId: [selectedOptionIds]}
 let availableModifiers = []; // Store available modifiers for current item
 
+// Stripe payment state
+let stripe = null;
+let paymentElement = null;
+let currentPaymentIntentId = null;
+
 // Detect base URL automatically
 const getApiUrl = () => {
     const port = window.location.port;
@@ -72,6 +77,12 @@ function setupEventListeners() {
     document.getElementById('confirmarPedido').addEventListener('click', confirmarPedido);
     document.getElementById('viewCartBtn').addEventListener('click', openCart);
     document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+    
+    // Payment modal listeners
+    document.getElementById('closePaymentModal').addEventListener('click', closePaymentModal);
+    document.getElementById('cancel-payment-btn').addEventListener('click', closePaymentModal);
+    document.getElementById('submit-payment-btn').addEventListener('click', handlePaymentSubmit);
+    document.getElementById('paymentModalOverlay').addEventListener('click', closePaymentModal);
     document.getElementById('searchMenuBtn').addEventListener('click', openSearchModal);
     document.getElementById('closeSearchModalBtn').addEventListener('click', closeSearchModal);
     document.getElementById('searchModalOverlay').addEventListener('click', closeSearchModal);
@@ -823,4 +834,221 @@ function showNotification(message, type = 'success') {
     setTimeout(() => {
         notification.style.display = 'none';
     }, 3000);
+}
+
+// ========== STRIPE PAYMENT FUNCTIONS ==========
+
+// Initialize Stripe (you'll need to set STRIPE_PUBLISHABLE_KEY in your environment)
+async function initializeStripe() {
+    // Get Stripe publishable key from server or environment
+    // For now, we'll fetch it from an endpoint or use env variable
+    try {
+        // You can create an endpoint to return the publishable key, or set it directly
+        // For security, it's better to have it in an env variable on the server
+        const stripeKey = process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_...'; // Replace with your key
+        
+        // For now, we'll initialize Stripe when payment modal opens
+        // This way we can get the key from the server if needed
+    } catch (error) {
+        console.error('Error initializing Stripe:', error);
+    }
+}
+
+// Open payment modal
+async function openPaymentModal() {
+    if (cart.length === 0) return;
+    
+    const total = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    
+    // Update payment total display
+    document.getElementById('paymentTotal').textContent = total.toFixed(2);
+    document.getElementById('submitPaymentAmount').textContent = total.toFixed(2);
+    
+    // Show modal
+    const modal = document.getElementById('paymentModal');
+    const overlay = document.getElementById('paymentModalOverlay');
+    modal.classList.add('open');
+    overlay.classList.add('show');
+    
+    try {
+        // Create payment intent
+        const response = await fetch(`${API_URL}/create-payment-intent`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                amount: total,
+                mesa_id: mesaId
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to create payment intent');
+        }
+        
+        const { clientSecret, paymentIntentId } = await response.json();
+        currentPaymentIntentId = paymentIntentId;
+        
+        // Initialize Stripe (you need to set your publishable key)
+        // Get it from server endpoint or environment variable
+        const stripeKeyResponse = await fetch(`${API_URL}/stripe-config`);
+        let stripeKey;
+        
+        if (stripeKeyResponse.ok) {
+            const config = await stripeKeyResponse.json();
+            stripeKey = config.publishableKey;
+        } else {
+            // Fallback: you'll need to set this in your server
+            showNotification('Payment system not configured. Please contact support.', 'error');
+            closePaymentModal();
+            return;
+        }
+        
+        if (!stripeKey) {
+            showNotification('Payment system not configured. Please contact support.', 'error');
+            closePaymentModal();
+            return;
+        }
+        
+        if (!stripe) {
+            stripe = Stripe(stripeKey);
+        }
+        
+        // Create payment element
+        const elements = stripe.elements({
+            clientSecret: clientSecret,
+            appearance: {
+                theme: 'stripe'
+            }
+        });
+        
+        paymentElement = elements.create('payment', {
+            layout: 'tabs'
+        });
+        
+        paymentElement.mount('#payment-element');
+        
+    } catch (error) {
+        console.error('Error opening payment modal:', error);
+        showNotification('Error initializing payment. Please try again.', 'error');
+        closePaymentModal();
+    }
+}
+
+// Close payment modal
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    const overlay = document.getElementById('paymentModalOverlay');
+    modal.classList.remove('open');
+    overlay.classList.remove('show');
+    
+    if (paymentElement) {
+        paymentElement.unmount();
+        paymentElement = null;
+    }
+    
+    const messageEl = document.getElementById('payment-message');
+    messageEl.style.display = 'none';
+    messageEl.textContent = '';
+}
+
+// Handle payment submission
+async function handlePaymentSubmit() {
+    if (!stripe || !paymentElement) {
+        showNotification('Payment system not initialized', 'error');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submit-payment-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    
+    const messageEl = document.getElementById('payment-message');
+    messageEl.style.display = 'none';
+    
+    try {
+        // Confirm payment
+        const { error: paymentError } = await stripe.confirmPayment({
+            elements: {
+                payment: paymentElement
+            },
+            confirmParams: {
+                return_url: `${window.location.origin}${window.location.pathname}?mesa=${mesaId}&payment=success`
+            },
+            redirect: 'if_required' // Don't redirect, handle in JS
+        });
+        
+        if (paymentError) {
+            messageEl.textContent = paymentError.message;
+            messageEl.className = 'payment-message error';
+            messageEl.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = `Pay $${document.getElementById('submitPaymentAmount').textContent}`;
+            return;
+        }
+        
+        // Payment succeeded, create order
+        const notas = document.getElementById('notas').value.trim();
+        const total = cart.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        
+        const orderResponse = await fetch(`${API_URL}/confirm-payment-order`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                paymentIntentId: currentPaymentIntentId,
+                mesa_id: mesaId,
+                items: cart.map(item => ({
+                    id: item.id,
+                    nombre: item.nombre,
+                    precio: item.precio,
+                    cantidad: item.cantidad,
+                    notas: item.notas || '',
+                    modifiers: item.modifiers || null,
+                    basePrice: item.basePrice || item.precio
+                })),
+                total: total,
+                notas: notas
+            })
+        });
+        
+        if (!orderResponse.ok) {
+            throw new Error('Failed to create order');
+        }
+        
+        // Success!
+        messageEl.textContent = 'Payment successful! Order confirmed.';
+        messageEl.className = 'payment-message success';
+        messageEl.style.display = 'block';
+        
+        showNotification('Payment successful! Order confirmed. 🎉', 'success');
+        
+        // Clear cart and close modals
+        setTimeout(() => {
+            cart = [];
+            updateCart();
+            document.getElementById('notas').value = '';
+            closeCart();
+            closePaymentModal();
+            renderMenu();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Payment error:', error);
+        messageEl.textContent = error.message || 'Payment failed. Please try again.';
+        messageEl.className = 'payment-message error';
+        messageEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = `Pay $${document.getElementById('submitPaymentAmount').textContent}`;
+    }
+}
+
+// Modified confirm order function to open payment modal
+async function confirmarPedido() {
+    if (cart.length === 0) return;
+    
+    // Open payment modal instead of directly creating order
+    await openPaymentModal();
 }

@@ -11,6 +11,12 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+// Stripe configuration - Use environment variables for security
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
+
+const stripe = require('stripe')(STRIPE_SECRET_KEY);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -244,6 +250,99 @@ app.get('/api/mesa/:mesa_id/pedidos', async (req, res) => {
     }
 });
 
+// ========== STRIPE PAYMENT ROUTES ==========
+
+// Get Stripe publishable key (safe to expose to client)
+app.get('/api/stripe-config', (req, res) => {
+    res.json({ publishableKey: STRIPE_PUBLISHABLE_KEY });
+});
+
+// Create payment intent
+app.post('/api/create-payment-intent', async (req, res) => {
+    try {
+        const { amount, mesa_id, order_id } = req.body;
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ error: 'Invalid amount' });
+        }
+
+        // Convert amount to cents (Stripe uses cents)
+        const amountInCents = Math.round(amount * 100);
+
+        // Create payment intent
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amountInCents,
+            currency: 'aud', // Australian Dollars
+            metadata: {
+                mesa_id: mesa_id || 'unknown',
+                order_id: order_id || 'unknown'
+            },
+            payment_method_types: ['card'],
+            // Enable Apple Pay and Google Pay
+            payment_method_options: {
+                card: {
+                    request_three_d_secure: 'automatic'
+                }
+            }
+        });
+
+        res.json({
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id
+        });
+    } catch (error) {
+        console.error('Error creating payment intent:', error);
+        res.status(500).json({ error: error.message || 'Error creating payment intent' });
+    }
+});
+
+// Confirm payment and create order
+app.post('/api/confirm-payment-order', async (req, res) => {
+    try {
+        const { paymentIntentId, mesa_id, items, total, notas } = req.body;
+
+        if (!paymentIntentId || !mesa_id || !items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'Incomplete data' });
+        }
+
+        // Verify payment intent
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+        if (paymentIntent.status !== 'succeeded') {
+            return res.status(400).json({ error: 'Payment not completed' });
+        }
+
+        // Create the order
+        const { data: pedido, error: pedidoError } = await supabase
+            .from('pedidos')
+            .insert({
+                mesa_id,
+                items: items,
+                total: total || 0,
+                notas: notas || '',
+                estado: 'pendiente',
+                payment_intent_id: paymentIntentId,
+                payment_status: 'paid',
+                created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (pedidoError) {
+            console.error('Error creating order:', pedidoError);
+            return res.status(500).json({ error: 'Error creating order' });
+        }
+
+        res.status(201).json({
+            message: 'Order created successfully',
+            pedido
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Catch-all route to serve frontend (SPA)
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
@@ -264,6 +363,11 @@ app.listen(PORT, '0.0.0.0', () => {
         console.log(`✅ Supabase configured: ${SUPABASE_URL}`);
     } else {
         console.log(`⚠️  Supabase not configured. Set SUPABASE_URL and SUPABASE_KEY`);
+    }
+    if (STRIPE_SECRET_KEY && STRIPE_PUBLISHABLE_KEY) {
+        console.log(`✅ Stripe configured: ${STRIPE_PUBLISHABLE_KEY.substring(0, 20)}...`);
+    } else {
+        console.log(`⚠️  Stripe not configured. Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY`);
     }
     if (process.env.NODE_ENV === 'production') {
         console.log(`🌐 Application deployed in production`);
