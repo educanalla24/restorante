@@ -351,6 +351,127 @@ app.post('/api/confirm-payment-order', async (req, res) => {
     }
 });
 
+// ========== STRIPE TERMINAL ROUTES ==========
+
+// Create Terminal connection token (required to connect to Terminal hardware)
+app.post('/api/terminal/connection-token', async (req, res) => {
+    try {
+        if (!STRIPE_SECRET_KEY) {
+            return res.status(500).json({ error: 'Stripe not configured' });
+        }
+
+        const connectionToken = await stripe.terminal.connectionTokens.create();
+        
+        res.json({
+            secret: connectionToken.secret
+        });
+    } catch (error) {
+        console.error('Error creating connection token:', error);
+        res.status(500).json({ 
+            error: 'Error creating connection token',
+            details: error.message || 'Unknown error'
+        });
+    }
+});
+
+// Create PaymentIntent for Terminal
+app.post('/api/terminal/create-payment-intent', async (req, res) => {
+    try {
+        const { amount, order_id, mesa_id } = req.body;
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ error: 'Invalid amount' });
+        }
+
+        if (!STRIPE_SECRET_KEY) {
+            return res.status(500).json({ error: 'Stripe not configured' });
+        }
+
+        // Convert amount to cents
+        const amountInCents = Math.round(amount * 100);
+
+        // Create payment intent for Terminal
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amountInCents,
+            currency: 'aud',
+            payment_method_types: ['card_present'],
+            capture_method: 'automatic',
+            metadata: {
+                order_id: order_id || 'unknown',
+                mesa_id: mesa_id || 'unknown',
+                payment_type: 'terminal'
+            }
+        });
+
+        res.json({
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id
+        });
+    } catch (error) {
+        console.error('Error creating Terminal payment intent:', error);
+        res.status(500).json({ 
+            error: 'Error creating payment intent',
+            details: error.message || 'Unknown error'
+        });
+    }
+});
+
+// Confirm Terminal payment and update order
+app.post('/api/terminal/confirm-payment', async (req, res) => {
+    try {
+        const { paymentIntentId, order_id } = req.body;
+
+        if (!paymentIntentId) {
+            return res.status(400).json({ error: 'Payment intent ID required' });
+        }
+
+        if (!STRIPE_SECRET_KEY) {
+            return res.status(500).json({ error: 'Stripe not configured' });
+        }
+
+        // Verify payment intent
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+        if (paymentIntent.status !== 'succeeded') {
+            return res.status(400).json({ 
+                error: 'Payment not completed',
+                status: paymentIntent.status
+            });
+        }
+
+        // Update order payment status if order_id is provided
+        if (order_id) {
+            const { error: updateError } = await supabase
+                .from('pedidos')
+                .update({
+                    payment_intent_id: paymentIntentId,
+                    payment_status: 'paid'
+                })
+                .eq('id', order_id);
+
+            if (updateError) {
+                console.error('Error updating order:', updateError);
+                // Don't fail the request, payment was successful
+            }
+        }
+
+        res.json({
+            success: true,
+            paymentIntent: {
+                id: paymentIntent.id,
+                status: paymentIntent.status,
+                amount: paymentIntent.amount / 100
+            }
+        });
+    } catch (error) {
+        console.error('Error confirming Terminal payment:', error);
+        res.status(500).json({ 
+            error: 'Error confirming payment',
+            details: error.message || 'Unknown error'
+        });
+    }
+});
+
 // Catch-all route to serve frontend (SPA)
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {

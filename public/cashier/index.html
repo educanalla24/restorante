@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashier Terminal - Stripe Terminal</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .terminal-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .terminal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .terminal-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .terminal-status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+        
+        .terminal-status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+        
+        .terminal-status.connecting {
+            background: #fff3e0;
+            color: #e65100;
+            border: 2px solid #ff9800;
+        }
+        
+        .orders-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .orders-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pending-orders, .payment-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .order-card-terminal {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .order-card-terminal:hover {
+            border-color: #2196f3;
+            background: #f5f5f5;
+        }
+        
+        .order-card-terminal.selected {
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+        
+        .order-card-terminal h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .order-card-terminal .order-total {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2196f3;
+            margin-top: 10px;
+        }
+        
+        .payment-controls {
+            margin-top: 20px;
+        }
+        
+        .payment-amount-display {
+            font-size: 2em;
+            font-weight: 600;
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .btn-terminal {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        
+        .btn-terminal:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-connect {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-connect:hover:not(:disabled) {
+            background: #45a049;
+        }
+        
+        .btn-process-payment {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-process-payment:hover:not(:disabled) {
+            background: #1976d2;
+        }
+        
+        .btn-cancel {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-cancel:hover:not(:disabled) {
+            background: #d32f2f;
+        }
+        
+        .payment-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .payment-status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .payment-status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .payment-status.processing {
+            background: #fff3e0;
+            color: #e65100;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <h1>💳 Cashier Terminal</h1>
+            <p class="subtitle">Process in-person payments with Stripe Terminal</p>
+        </div>
+        
+        <div id="terminalStatus" class="terminal-status disconnected">
+            Terminal Disconnected
+        </div>
+        
+        <div class="orders-section">
+            <div class="pending-orders">
+                <h2>Pending Orders</h2>
+                <div id="pendingOrdersList">
+                    <div class="loading">Loading orders...</div>
+                </div>
+            </div>
+            
+            <div class="payment-section">
+                <h2>Payment</h2>
+                <div id="selectedOrderInfo" style="display: none;">
+                    <div class="order-card-terminal">
+                        <h3 id="selectedOrderTable">Table -</h3>
+                        <div id="selectedOrderItems"></div>
+                        <div class="order-total" id="selectedOrderTotal">$0.00</div>
+                    </div>
+                </div>
+                
+                <div id="noOrderSelected" style="text-align: center; padding: 40px; color: #999;">
+                    Select an order to process payment
+                </div>
+                
+                <div class="payment-controls" id="paymentControls" style="display: none;">
+                    <div class="payment-amount-display" id="paymentAmount">$0.00</div>
+                    
+                    <button id="connectTerminalBtn" class="btn-terminal btn-connect">
+                        Connect Terminal Reader
+                    </button>
+                    
+                    <button id="processPaymentBtn" class="btn-terminal btn-process-payment" disabled>
+                        Process Payment
+                    </button>
+                    
+                    <button id="cancelPaymentBtn" class="btn-terminal btn-cancel">
+                        Cancel
+                    </button>
+                    
+                    <div id="paymentStatus" class="payment-status" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification" style="display: none;"></div>
+    
+    <!-- Stripe Terminal JS SDK -->
+    <script src="https://js.stripe.com/terminal/v1/"></script>
+    <script src="cashier.js"></script>
+</body>
+</html>
+
