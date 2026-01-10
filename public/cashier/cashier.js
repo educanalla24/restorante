@@ -214,7 +214,7 @@ async function discoverAndConnectReader() {
     try {
         // Discover readers
         const discoveryResult = await terminal.discoverReaders({
-            simulated: true, // Set to false in production with real hardware
+            simulated: false, // Production mode - uses real hardware
             location: null // You can specify a location ID if you have multiple locations
         });
         
