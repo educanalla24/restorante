@@ -330,7 +330,12 @@ app.post('/api/confirm-payment-order', async (req, res) => {
 
         if (pedidoError) {
             console.error('Error creating order:', pedidoError);
-            return res.status(500).json({ error: 'Error creating order' });
+            console.error('Error details:', JSON.stringify(pedidoError, null, 2));
+            return res.status(500).json({ 
+                error: 'Error creating order',
+                details: pedidoError.message || 'Unknown error',
+                code: pedidoError.code
+            });
         }
 
         res.status(201).json({
@@ -339,7 +344,10 @@ app.post('/api/confirm-payment-order', async (req, res) => {
         });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ 
+            error: 'Server error',
+            details: error.message || 'Unknown error'
+        });
     }
 });
 

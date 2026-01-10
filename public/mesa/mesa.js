@@ -1015,7 +1015,10 @@ async function handlePaymentSubmit() {
         });
         
         if (!orderResponse.ok) {
-            throw new Error('Failed to create order');
+            const errorData = await orderResponse.json().catch(() => ({}));
+            const errorMessage = errorData.details || errorData.error || 'Failed to create order';
+            console.error('Order creation error:', errorData);
+            throw new Error(errorMessage);
         }
         
         // Success!
@@ -1037,11 +1040,15 @@ async function handlePaymentSubmit() {
         
     } catch (error) {
         console.error('Payment error:', error);
-        messageEl.textContent = error.message || 'Payment failed. Please try again.';
+        const errorMessage = error.message || 'Payment failed. Please try again.';
+        messageEl.textContent = errorMessage;
         messageEl.className = 'payment-message error';
         messageEl.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.textContent = `Pay $${document.getElementById('submitPaymentAmount').textContent}`;
+        
+        // Show notification with error
+        showNotification(`Error: ${errorMessage}`, 'error');
     }
 }
 
