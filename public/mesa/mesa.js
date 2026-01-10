@@ -14,6 +14,7 @@ let availableModifiers = []; // Store available modifiers for current item
 
 // Stripe payment state
 let stripe = null;
+let stripeElements = null; // Store the Elements instance
 let paymentElement = null;
 let currentPaymentIntentId = null;
 
@@ -916,14 +917,14 @@ async function openPaymentModal() {
         }
         
         // Create payment element
-        const elements = stripe.elements({
+        stripeElements = stripe.elements({
             clientSecret: clientSecret,
             appearance: {
                 theme: 'stripe'
             }
         });
         
-        paymentElement = elements.create('payment', {
+        paymentElement = stripeElements.create('payment', {
             layout: 'tabs'
         });
         
@@ -947,6 +948,7 @@ function closePaymentModal() {
         paymentElement.unmount();
         paymentElement = null;
     }
+    stripeElements = null;
     
     const messageEl = document.getElementById('payment-message');
     messageEl.style.display = 'none';
@@ -955,7 +957,7 @@ function closePaymentModal() {
 
 // Handle payment submission
 async function handlePaymentSubmit() {
-    if (!stripe || !paymentElement) {
+    if (!stripe || !paymentElement || !stripeElements) {
         showNotification('Payment system not initialized', 'error');
         return;
     }
@@ -968,11 +970,9 @@ async function handlePaymentSubmit() {
     messageEl.style.display = 'none';
     
     try {
-        // Confirm payment
+        // Confirm payment - pass the Elements instance, not the payment element
         const { error: paymentError } = await stripe.confirmPayment({
-            elements: {
-                payment: paymentElement
-            },
+            elements: stripeElements,
             confirmParams: {
                 return_url: `${window.location.origin}${window.location.pathname}?mesa=${mesaId}&payment=success`
             },
